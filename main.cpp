@@ -1,57 +1,85 @@
+#include <vector>
 #include <iostream>
-#include <map>
-#include <string>
-#include "builder.h"
-
-class GlobalCoffeeConfig {
-    std::map<std::string, std::string> coffeeState;
-
-    /// Private constructor
-    GlobalCoffeeConfig() {}
-
+class CoffeeMachine {
 public:
-    // Remove ability to use the copy constructor
-    GlobalCoffeeConfig(GlobalCoffeeConfig const&) = delete;
+    virtual CoffeeMachine* clone() = 0;
+    virtual void brew() = 0;
+};
 
-    // Remove the ability to use the copy assignment operator
-    GlobalCoffeeConfig &operator=(GlobalCoffeeConfig const&) = delete;
-
-    // provide a single, static method for retrieving the singleton instance
-    static GlobalCoffeeConfig &get() {
-        static GlobalCoffeeConfig config;
-        return config;
+class SimpleCoffeeMachine : public CoffeeMachine {
+public:
+    CoffeeMachine* clone() {
+        return new SimpleCoffeeMachine;
     }
 
-    void setState(const std::string &key, const std::string &value) {
-        coffeeState.insert({key, value});
-    }
-
-    std::string getState(const std::string key) {
-        auto iterator = coffeeState.find(key);
-        return iterator->second;
+    void brew() {
+        std::cout << "Brewing simple coffee\n";
     }
 };
 
+class ComplexCoffeeMachine : public CoffeeMachine {
+public:
+    CoffeeMachine* clone() {
+        return new ComplexCoffeeMachine;
+    }
+
+    void brew() {
+        std::cout << "brewing complex coffee \n";
+    }
+};
+
+class ExpressMachine: public CoffeeMachine {
+public:
+    CoffeeMachine* clone() {
+        return new ExpressMachine;
+    }
+
+    void brew() {
+        std::cout << "Brewing Express coffee \n";
+    }
+};
+
+class CoffeeMachineManager {
+public:
+    static CoffeeMachine* createMachine(int machineType);
+    ~CoffeeMachineManager(){};
+
+private:
+    static CoffeeMachine* machines[3];
+};
+
+CoffeeMachine* CoffeeMachineManager::machines[] = {
+        new SimpleCoffeeMachine, new ComplexCoffeeMachine, new ExpressMachine
+};
+
+CoffeeMachine* CoffeeMachineManager::createMachine(int machineType){
+    return machines[machineType]->clone();
+}
+
 int main() {
-    std::cout << "Hello, Singletons!" << std::endl;
-    GlobalCoffeeConfig& configObj = GlobalCoffeeConfig::get();
-    configObj.setState("COFFEE_STATUS", "ON");
-    configObj.setState("COFFEE_HEALTH_URL", "./heath");
-    printf("COFFEE_STATUS: %s\n", configObj.getState("COFFEE_STATUS").c_str());
-    printf("COFFEE_HEALTH_URL: %s\n", configObj.getState("COFFEE_HEALTH_URL").c_str());
+    std::vector<CoffeeMachine*> myMachines[7];
+    CoffeeMachine* simpleMachine = CoffeeMachineManager::createMachine(0);
+    CoffeeMachine* complexMachine = CoffeeMachineManager::createMachine(1);
+    CoffeeMachine* expressMachine = CoffeeMachineManager::createMachine(2);
 
-    // Builder pattern example
-    Coffee coffee = Coffee::create("Zachary")
-            .makeHot()
-            .addSugar()
-            .addMilk()
-            .costs(6.4);
+    myMachines->push_back(simpleMachine);
+    myMachines->push_back(complexMachine);
+    myMachines->push_back(expressMachine);
 
-    Coffee coffee1 = Coffee::create("Jenifer")
-            .makeHot()
-            .costs(3.44);
+    std::cout << myMachines->size();
 
-    std::cout << coffee.cost << std::endl;
-    std::cout << coffee1.cost << std::endl;
+    for (int i = 0; i < myMachines->size(); i++) {
+        myMachines->at(i)->brew();
+    }
+
+    CoffeeMachine* clonedMachine = simpleMachine->clone();
+    clonedMachine->brew();
+
+    // clean up
+    for (int i = 0; i < myMachines->size(); ++i) {
+        delete myMachines->at(i);
+    }
+
+    delete clonedMachine;
     return EXIT_SUCCESS;
 }
