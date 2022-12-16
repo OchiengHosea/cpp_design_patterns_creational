@@ -3,4 +3,4 @@ project(designpatterns)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(designpatterns main.cpp)
+add_executable(designpatterns main.cpp builder.cpp builder.h)

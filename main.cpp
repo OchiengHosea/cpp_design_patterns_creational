@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include "builder.h"
 
 class GlobalCoffeeConfig {
     std::map<std::string, std::string> coffeeState;
@@ -39,5 +40,18 @@ int main() {
     printf("COFFEE_STATUS: %s\n", configObj.getState("COFFEE_STATUS").c_str());
     printf("COFFEE_HEALTH_URL: %s\n", configObj.getState("COFFEE_HEALTH_URL").c_str());
 
+    // Builder pattern example
+    Coffee coffee = Coffee::create("Zachary")
+            .makeHot()
+            .addSugar()
+            .addMilk()
+            .costs(6.4);
+
+    Coffee coffee1 = Coffee::create("Jenifer")
+            .makeHot()
+            .costs(3.44);
+
+    std::cout << coffee.cost << std::endl;
+    std::cout << coffee1.cost << std::endl;
     return EXIT_SUCCESS;
 }
